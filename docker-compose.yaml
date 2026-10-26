@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16
+
+    environment:
+      POSTGRES_DB: spring_course_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Password
+
+
+
+    volumes:
+      - dati-spring_course_db:/var/lib/postgresql/data
+
+volumes:
+  dati-spring_course_db:
