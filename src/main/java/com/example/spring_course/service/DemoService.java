@@ -1,63 +1,92 @@
 package com.example.spring_course.service;
 
+import com.example.spring_course.repository.model.UserEntity;
+import com.example.spring_course.repository.UserRepository;
 import com.example.spring_course.service.dto.UserRequestDto;
 import com.example.spring_course.service.dto.UserResponseDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class DemoService {
 
-    private final Map<UUID, UserRequestDto> fakeDatabase = new HashMap<>();
+    private final UserRepository userRepository;
 
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
-        UUID nuovoId =  UUID.randomUUID();
-        fakeDatabase.put(nuovoId, userRequestDto);
+        try {
+            UserEntity user = new UserEntity();
 
-        return new UserResponseDto(
-                "Utente salvato con successo",
-                nuovoId.toString()
-        );
+            user.setNome(userRequestDto.getNome());
+            user.setEmail(userRequestDto.getEmail());
+            user.setEta(userRequestDto.getEta());
+            user.setIndirizzo(userRequestDto.getIndirizzo());
+
+            userRepository.save(user);
+
+            return new UserResponseDto(
+                    "Utente salvato con successo",
+                    user.getId().toString()
+            );
+        } catch (Exception e) {
+            return new UserResponseDto(
+                    "Errore durante il salvataggio: " + e.getMessage(),
+                    null
+            );
+        }
     }
 
     public boolean deleteUser(UUID id) {
-        System.out.println("ID cercato: " + id);
-        System.out.println("ID presenti nel DB: " + fakeDatabase.keySet());
-        if (fakeDatabase.containsKey(id)) {
-            fakeDatabase.remove(id);
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
             return true;
         }
         return false;
     }
 
-    public UserRequestDto getUserById(UUID nuovoId) {
-        return fakeDatabase.get(nuovoId);
+    public UserRequestDto getUserById(UUID id) {
+        return userRepository.findById(id)
+                .map(this::convertToDto)
+                .orElse(null);
     }
 
     public UserResponseDto updateUser(UUID id, UserRequestDto newData) {
-        if (!fakeDatabase.containsKey(id)) {
-            return null;
-        }
-        fakeDatabase.put(id, newData);
+        return userRepository.findById(id).map(user -> {
+            user.setNome(newData.getNome());
+            userRepository.save(user);
 
-        return new UserResponseDto(
-                "Utente aggiornato con successo",
-                id.toString()
-        );
+            return new UserResponseDto(
+                    "Utente aggiornato con successo",
+                    id.toString()
+            );
+        }).orElse(null);
     }
 
-    public List<UserRequestDto> getAllUsers(String nome) {
-        List<UserRequestDto> allUsers = new ArrayList<>(fakeDatabase.values());
+    public List<UserRequestDto> getAllUsers(String email) {
+        List<UserEntity> users;
 
-        if (nome == null || nome.isEmpty()) {
-            return allUsers;
+        if (email == null || email.isEmpty()) {
+            users = userRepository.findAll();
+        } else {
+            users = userRepository.findByEmail(email);
         }
 
-        return allUsers.stream()
-                .filter(utente -> nome.equalsIgnoreCase(utente.getNome()))
+        return users.stream()
+                .map(this::convertToDto)
                 .toList();
     }
 
+    private UserRequestDto convertToDto(UserEntity user) {
+        UserRequestDto dto = new UserRequestDto();
+        dto.setId(user.getId());
+        dto.setNome(user.getNome());
+        dto.setEmail(user.getEmail());
+        dto.setEta(user.getEta());
+        dto.setIndirizzo(user.getIndirizzo());
 
+        return dto;
+    }
 }
