@@ -8,6 +8,8 @@ import com.example.spring_course.service.dto.UserResponseDto;
 import com.example.spring_course.service.mapper.MapperUserDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1")
 public class DemoController {
 
+    private static final Logger log = LoggerFactory.getLogger(DemoController.class);
     private final MapperUserDto mapperUserDto;
     private final DemoService demoService;
 
@@ -29,7 +32,7 @@ public class DemoController {
     }
 
     @GetMapping("/users/{id}")
-    public ResponseEntity<Object> getUserById(@PathVariable("id") String id) {
+    public ResponseEntity<Object> getUserById(@Valid @PathVariable("id") String id) {
 
         if (id == null || id.isBlank()) {
             return ResponseEntity.badRequest().body("ID mancante");
@@ -44,16 +47,12 @@ public class DemoController {
 
         UserRequestDto utenteTrovato = demoService.getUserById(uuidRicercato);
 
-        if (utenteTrovato == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utente non trovato");
-        }
-
         return ResponseEntity.ok().body(utenteTrovato);
     }
 
     @GetMapping("/users")
     public ResponseEntity<List<UserRequestDto>> getAllUsers(
-            @RequestParam(required = false) String nome
+            @Valid @RequestParam(required = false) String nome
     ) {
         List<UserRequestDto> users = demoService.getAllUsers(nome);
 
@@ -61,7 +60,7 @@ public class DemoController {
     }
 
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<String> deleteUserById(@PathVariable("id") String id) {
+    public ResponseEntity<String> deleteUserById(@Valid @PathVariable("id") String id) {
 
         UUID uuid;
         try {
@@ -100,6 +99,8 @@ public class DemoController {
 
     @PostMapping("/users")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest user) {
+
+        log.info("Ricevuta richiesta per creare un nuovo utente con email: {}", user.getEmail());
 
         UserRequestDto requestDto = mapperUserDto.toRequestDto(user);
 

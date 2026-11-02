@@ -16,6 +16,7 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "nome")
     private String nome;
     private String email;
     private int eta;

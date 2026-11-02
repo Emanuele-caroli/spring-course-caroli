@@ -1,10 +1,13 @@
 package com.example.spring_course.service;
 
+import com.example.spring_course.exceptions.AppException;
 import com.example.spring_course.repository.model.UserEntity;
 import com.example.spring_course.repository.UserRepository;
 import com.example.spring_course.service.dto.UserRequestDto;
 import com.example.spring_course.service.dto.UserResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,11 +15,13 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DemoService {
 
     private final UserRepository userRepository;
 
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
+        log.debug("Inizio elaborazione per l'utente: {}", userRequestDto.getNome());
         try {
             UserEntity user = new UserEntity();
 
@@ -48,9 +53,9 @@ public class DemoService {
     }
 
     public UserRequestDto getUserById(UUID id) {
-        return userRepository.findById(id)
-                .map(this::convertToDto)
-                .orElse(null);
+        UserEntity userEntity = userRepository.findById(id)
+                .orElseThrow(() -> new AppException("User " + id + " not found", HttpStatus.NOT_FOUND));
+        return convertToDto(userEntity);
     }
 
     public UserResponseDto updateUser(UUID id, UserRequestDto newData) {
