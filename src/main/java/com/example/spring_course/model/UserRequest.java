@@ -1,8 +1,6 @@
 package com.example.spring_course.model;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,8 +12,11 @@ public class UserRequest {
     @NotBlank
     private String nome;
     @NotBlank
+    @Email(message = "Rispetta il formato corretto delle email")
     private String email;
     @NotNull
+    @Min(value = 18, message = "I minorenni non possono registrarsi")
+    @Positive
     private int eta;
     @NotBlank
     @Pattern(regexp = "([A-Z]{2})")
