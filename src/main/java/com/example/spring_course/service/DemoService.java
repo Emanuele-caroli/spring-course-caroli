@@ -73,11 +73,7 @@ public class DemoService {
     public List<UserRequestDto> getAllUsers(String email) {
         List<UserEntity> users;
 
-        if (email == null || email.isEmpty()) {
-            users = userRepository.findAll();
-        } else {
-            users = userRepository.findByEmail(email);
-        }
+        users = userRepository.findAll();
 
         return users.stream()
                 .map(this::convertToDto)
