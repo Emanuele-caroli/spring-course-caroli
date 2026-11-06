@@ -13,7 +13,7 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     Optional<UserEntity> findByNome(String nome);
 
     @Query ("SELECT u FROM UserEntity u WHERE u.email = :email")
-    List<UserEntity> findByEmail(@Param("email") String email);
+    UserEntity findByEmail(@Param("email") String email);
 
     //Opzione non consiglita
 //    @Query (value = "SELECT * FROM users AS u WHERE u.nome = :nome", nativeQuery = true)
