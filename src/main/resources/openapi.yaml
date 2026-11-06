@@ -1,0 +1,113 @@
+openapi: 3.0.3
+
+
+info:
+  title: Rubrica API
+  description: API per la gestione dei contatti
+  version: 1.0.0
+
+
+servers:
+  - url: http://localhost:8080
+
+
+tags:
+  - name: Contatti
+    description: Gestione dei contatti
+
+
+paths:
+
+
+  /api/contatti:
+    get:
+      tags:
+        - Contatti
+      summary: Recupera tutti i contatti
+      operationId: trovaTutti
+      responses:
+        '200':
+          description: Lista dei contatti
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contatto'
+
+
+    post:
+      tags:
+        - Contatti
+      summary: Crea un contatto
+      operationId: creaContatto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContattoRequest'
+      responses:
+        '201':
+          description: Contatto creato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contatto'
+
+
+  /api/contatti/{id}:
+    get:
+      tags:
+        - Contatti
+      summary: Recupera un contatto tramite ID
+      operationId: trovaPerId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Contatto trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contatto'
+        '404':
+          description: Contatto non trovato
+
+
+components:
+
+
+  schemas:
+
+
+    Contatto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+
+
+    CreateContattoRequest:
+      type: object
+      required:
+        - nome
+        - email
+      properties:
+        nome:
+          type: string
+          maxLength: 50
+        email:
+          type: string
+          format: email
